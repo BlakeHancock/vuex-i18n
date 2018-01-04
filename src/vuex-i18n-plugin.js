@@ -151,24 +151,34 @@ VuexI18nPlugin.install = function install(Vue, store, moduleName = 'i18n', ident
 
 		// get the current language from the store
 		let locale = store.state[moduleName].locale;
+
+		// split locale by - to support partial fallback for regional locales
+		// like de-CH, en-UK
+		let localeRegional = locale.split('-');
+
 		let fallback = store.state[moduleName].fallback;
+
 		let translations = store.state[moduleName].translations;
 
 		// check if the language exists in the store.
-		if (translations.hasOwnProperty(locale) === false ) {
-
-			// check if a fallback locale exists
-			if (translations.hasOwnProperty(fallback) === false ) {
-				return false;
-			}
-
-			// check the fallback locale for the key
-			return translations[fallback].hasOwnProperty(key);
-
+		if (translations.hasOwnProperty(locale) === true) {
+			// check if the key exists in the store
+			return translations[locale].hasOwnProperty(key);
 		}
 
-		// check if the key exists in the store
-		return translations[locale].hasOwnProperty(key);
+		// check if the partial regional language exists in the store.
+		if (translations.hasOwnProperty(localeRegional) === true) {
+			// check if the key exists in the store
+			return translations[localeRegional].hasOwnProperty(key);
+		}
+
+		// check if a fallback locale exists
+		if (translations.hasOwnProperty(fallback) === true) {
+			// check the fallback locale for the key
+			return translations[fallback].hasOwnProperty(key);
+		}
+
+		return false;
 	};
 
 	// set fallback locale
